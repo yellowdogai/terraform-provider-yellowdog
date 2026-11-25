@@ -1,0 +1,59 @@
+# Based on HashiCorp's terraform-provider-scaffolding-framework.
+version: 2
+
+project_name: terraform-provider-yellowdog
+
+builds:
+  - env:
+      # goreleaser does not work with CGO
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w -X main.version={{ .Version }}"
+    # The platforms the Registry recommends, see https://developer.hashicorp.com/terraform/registry/providers/os-arch
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - linux_arm_6
+      - linux_s390x
+      - windows_amd64
+    binary: "{{ .ProjectName }}_v{{ .Version }}"
+
+archives:
+  - formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  algorithm: sha256
+
+signs:
+  - artifacts: checksum
+    args:
+      - --batch
+      - --local-user
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - --output
+      - ${signature}
+      - --detach-sign
+      - ${artifact}
+
+release:
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+  # A deploy that failed part way through left a draft, which a re-run completes.
+  use_existing_draft: true
+  replace_existing_artifacts: true
+  header: See the [release notes](https://docs.yellowdog.ai/#/release-notes/release-notes).
+
+# The release repository's history is one commit per release, so there is nothing to generate a changelog from.
+changelog:
+  disable: true
