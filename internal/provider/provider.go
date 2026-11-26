@@ -52,7 +52,8 @@ func (p *YellowdogProvider) Metadata(_ context.Context, _ provider.MetadataReque
 
 func (p *YellowdogProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Interact with the YellowDog Platform: cloud compute provisioning, worker pools, images, and account/access management.",
+		MarkdownDescription: "Manage [YellowDog](https://yellowdog.ai/) configuration as code.",
+		Description:         "Manage YellowDog configuration as code.",
 		Attributes: map[string]schema.Attribute{
 			"api_key_id": schema.StringAttribute{
 				Optional:            true,
